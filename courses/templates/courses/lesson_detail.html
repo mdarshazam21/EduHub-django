@@ -4,189 +4,354 @@
 
 {% block content %}
 
-<div class="container mt-4 mb-5">
+<div class="lesson-learning-page">
 
-    <!-- Course and lesson heading -->
-    <div class="mb-4">
-        <a href="{% url 'course_detail' course.slug %}" class="btn btn-outline-secondary btn-sm mb-3">
+    <!-- Lesson Header -->
+    <header class="learning-header">
+
+        <a href="{% url 'course_detail' course.slug %}" class="learning-back-link">
             &larr; Back to Course
         </a>
 
-        <h2>{{ lesson.title }}</h2>
+        <div class="learning-breadcrumb">
+            <span>{{ course.title }}</span>
+            <span class="breadcrumb-separator">/</span>
+            <span>{{ section.title }}</span>
+        </div>
 
-        <p class="text-muted mb-1">
-            <strong>Course:</strong> {{ course.title }}
-        </p>
+        <h1>{{ lesson.title }}</h1>
 
-        <p class="text-muted">
-            <strong>Section:</strong> {{ section.title }}
+        <div class="learning-meta">
+            <span class="learning-meta-item">
+                <span>📚</span>
+                {{ course.title }}
+            </span>
+
+            <span class="learning-meta-divider"></span>
+
+            <span class="learning-meta-item">
+                <span>📖</span>
+                {{ section.title }}
+            </span>
+
             {% if lesson.duration_minutes %}
-            | <strong>Duration:</strong> {{ lesson.duration_minutes }} minutes
+                <span class="learning-meta-divider"></span>
+
+                <span class="learning-meta-item">
+                    <span>⏱</span>
+                    {{ lesson.duration_minutes }} minutes
+                </span>
             {% endif %}
-        </p>
-    </div>
+        </div>
 
-    <div class="row">
+    </header>
 
-        <!-- Main lesson content -->
-        <div class="col-lg-8">
+    <!-- Main Layout -->
+    <div class="learning-layout">
 
-            <div class="card shadow-sm mb-4">
-                <div class="card-body">
+        <!-- Main Lesson Content -->
+        <main class="learning-main">
+
+            <section class="learning-content-card">
+
+                <div class="learning-content-header">
+                    <div>
+                        <span class="learning-content-eyebrow">LESSON CONTENT</span>
+                        <h2>Learn at your own pace</h2>
+                    </div>
+
+                    {% if is_completed %}
+                        <span class="learning-status-badge completed">
+                            ✓ Completed
+                        </span>
+                    {% else %}
+                        <span class="learning-status-badge in-progress">
+                            In Progress
+                        </span>
+                    {% endif %}
+                </div>
+
+                <div class="learning-content-body">
 
                     {% if lesson.content_type == "VIDEO" %}
 
-                    {% if lesson.video_file %}
-                    <video controls preload="metadata"
-                        style="width: 100%; max-height: 480px; background: #000; border-radius: 8px;">
-                        <source src="{{ lesson.video_file.url }}" type="video/mp4">
-                        Your browser does not support HTML video.
-                    </video>
-                    {% else %}
-                    <div class="alert alert-warning">
-                        The instructor has not uploaded a video for this lesson yet.
-                    </div>
-                    {% endif %}
+                        {% if lesson.video_file %}
+
+                            <div class="learning-video-wrapper">
+                                <video
+                                    class="learning-video"
+                                    controls
+                                    preload="metadata"
+                                >
+                                    <source
+                                        src="{{ lesson.video_file.url }}"
+                                        type="video/mp4"
+                                    >
+                                    Your browser does not support HTML video.
+                                </video>
+                            </div>
+
+                        {% else %}
+
+                            <div class="learning-content-message warning">
+                                <span class="learning-message-icon">🎬</span>
+                                <div>
+                                    <h3>Video not available yet</h3>
+                                    <p>
+                                        The instructor has not uploaded a video
+                                        for this lesson yet.
+                                    </p>
+                                </div>
+                            </div>
+
+                        {% endif %}
 
                     {% elif lesson.content_type == "TEXT" %}
 
-                    <div class="lesson-text-content">
-                        {{ lesson.text_content|linebreaks }}
-                    </div>
+                        <article class="learning-text-content">
+                            {{ lesson.text_content|linebreaks }}
+                        </article>
 
                     {% else %}
 
-                    <div class="alert alert-info">
-                        No supported content is available for this lesson.
-                    </div>
+                        <div class="learning-content-message information">
+                            <span class="learning-message-icon">ℹ️</span>
+                            <div>
+                                <h3>Content unavailable</h3>
+                                <p>
+                                    No supported content is available for
+                                    this lesson.
+                                </p>
+                            </div>
+                        </div>
 
                     {% endif %}
 
                 </div>
-            </div>
 
-            <!-- Lesson completion -->
-            <div class="card shadow-sm mb-4">
-                <div class="card-body">
+            </section>
 
-                    {% if is_completed %}
+            <!-- Lesson Completion -->
+            <section class="learning-completion-card">
 
-                    <div class="alert alert-success mb-3">
-                        <strong>Completed!</strong>
-                        You've finished this lesson.
+                {% if is_completed %}
+
+                    <div class="learning-completion-success">
+                        <div class="learning-completion-icon">✓</div>
+
+                        <div>
+                            <h2>Lesson completed!</h2>
+                            <p>
+                                Great work! You've finished this lesson.
+                                Continue to the next lesson when you're ready.
+                            </p>
+                        </div>
                     </div>
 
-                    {% else %}
+                {% else %}
 
-                    <h5>Have you finished this lesson?</h5>
+                    <div class="learning-completion-content">
+                        <div class="learning-completion-icon pending">✓</div>
 
-                    <p class="text-muted">
-                        Mark this lesson as complete to track your learning progress.
-                    </p>
+                        <div class="learning-completion-text">
+                            <h2>Finished this lesson?</h2>
+                            <p>
+                                Mark this lesson as complete to keep track
+                                of your learning progress.
+                            </p>
+                        </div>
+                    </div>
 
-                    <form method="post" action="{% url 'mark_lesson_complete' lesson.id %}">
+                    <form
+                        method="post"
+                        action="{% url 'mark_lesson_complete' lesson.id %}"
+                    >
                         {% csrf_token %}
 
-                        <button type="submit" class="btn btn-success">
+                        <button
+                            type="submit"
+                            class="learning-complete-button"
+                        >
                             Mark as Complete
                         </button>
                     </form>
 
-                    {% endif %}
+                {% endif %}
 
-                </div>
-            </div>
+            </section>
 
-            <!-- Previous and next lesson navigation -->
-            <div class="d-flex justify-content-between gap-3">
+            <!-- Previous and Next Lesson Navigation -->
+            <nav class="learning-navigation" aria-label="Lesson navigation">
 
-                <div>
+                <div class="learning-navigation-item">
                     {% if previous_lesson %}
-                    <a href="{% url 'lesson_detail' course.slug previous_lesson.id %}" class="btn btn-outline-primary">
-                        &larr; Previous Lesson
-                    </a>
+
+                        <span class="learning-navigation-label">
+                            PREVIOUS LESSON
+                        </span>
+
+                        <a
+                            href="{% url 'lesson_detail' course.slug previous_lesson.id %}"
+                            class="learning-navigation-link previous"
+                        >
+                            <span class="learning-navigation-arrow">←</span>
+
+                            <span>
+                                <strong>{{ previous_lesson.title }}</strong>
+                                <small>Previous lesson</small>
+                            </span>
+                        </a>
+
                     {% endif %}
                 </div>
 
-                <div>
+                <div class="learning-navigation-item next-navigation">
                     {% if next_lesson %}
-                    <a href="{% url 'lesson_detail' course.slug next_lesson.id %}" class="btn btn-primary">
-                        Next Lesson &rarr;
-                    </a>
+
+                        <span class="learning-navigation-label">
+                            NEXT LESSON
+                        </span>
+
+                        <a
+                            href="{% url 'lesson_detail' course.slug next_lesson.id %}"
+                            class="learning-navigation-link next"
+                        >
+                            <span>
+                                <strong>{{ next_lesson.title }}</strong>
+                                <small>Continue learning</small>
+                            </span>
+
+                            <span class="learning-navigation-arrow">→</span>
+                        </a>
+
                     {% else %}
-                    <a href="{% url 'course_detail' course.slug %}" class="btn btn-outline-primary">
-                        Back to Course
-                    </a>
+
+                        <span class="learning-navigation-label">
+                            COURSE
+                        </span>
+
+                        <a
+                            href="{% url 'course_detail' course.slug %}"
+                            class="learning-navigation-link next"
+                        >
+                            <span>
+                                <strong>Back to Course</strong>
+                                <small>View course details</small>
+                            </span>
+
+                            <span class="learning-navigation-arrow">→</span>
+                        </a>
+
                     {% endif %}
                 </div>
 
-            </div>
+            </nav>
 
-        </div>
+        </main>
 
-        <!-- Course curriculum -->
-        <div class="col-lg-4">
+        <!-- Course Curriculum Sidebar -->
+        <aside class="learning-sidebar">
 
-            <div class="card shadow-sm">
-                <div class="card-header">
-                    <h5 class="mb-0">Course Curriculum</h5>
+            <section class="learning-curriculum-card">
+
+                <div class="learning-curriculum-header">
+                    <span class="learning-curriculum-icon">📚</span>
+
+                    <div>
+                        <h2>Course Curriculum</h2>
+                        <p>Navigate through the lessons.</p>
+                    </div>
                 </div>
 
-                <div class="card-body">
+                <div class="learning-curriculum-body">
 
                     {% for curriculum_section in curriculum_sections %}
 
-                    <h6 class="mt-2">
-                        {{ curriculum_section.title }}
-                    </h6>
+                        <div class="curriculum-section">
 
-                    <ul class="list-group list-group-flush mb-3">
+                            <h3 class="curriculum-section-title">
+                                {{ curriculum_section.title }}
+                            </h3>
 
-                        {% for curriculum_lesson in curriculum_section.lessons.all %}
+                            <ul class="curriculum-lesson-list">
 
-                        <li class="list-group-item px-0">
+                                {% for curriculum_lesson in curriculum_section.lessons.all %}
 
-                            <a href="{% url 'lesson_detail' course.slug curriculum_lesson.id %}"
-                                class="text-decoration-none {% if curriculum_lesson.id == lesson.id %}fw-bold{% endif %}">
+                                    <li
+                                        class="curriculum-lesson-item
+                                        {% if curriculum_lesson.id == lesson.id %}active{% endif %}"
+                                    >
 
-                                {% if curriculum_lesson.id == lesson.id %}
-                                ▶
-                                {% endif %}
+                                        <a
+                                            href="{% url 'lesson_detail' course.slug curriculum_lesson.id %}"
+                                            class="curriculum-lesson-link"
+                                            {% if curriculum_lesson.id == lesson.id %}
+                                                aria-current="page"
+                                            {% endif %}
+                                        >
 
-                                {{ curriculum_lesson.title }}
+                                            <span class="curriculum-lesson-indicator">
 
-                            </a>
+                                                {% if curriculum_lesson.id == lesson.id %}
+                                                    ▶
+                                                {% elif curriculum_lesson.id in completed_lesson_ids %}
+                                                    ✓
+                                                {% else %}
+                                                    •
+                                                {% endif %}
 
-                            {% if curriculum_lesson.id in completed_lesson_ids %}
-                            <span class="text-success float-end" title="Completed">
-                                ✓
-                            </span>
-                            {% endif %}
+                                            </span>
 
-                        </li>
+                                            <span class="curriculum-lesson-title">
+                                                {{ curriculum_lesson.title }}
+                                            </span>
 
-                        {% empty %}
+                                        </a>
 
-                        <li class="list-group-item px-0 text-muted">
-                            No lessons in this section yet.
-                        </li>
+                                        {% if curriculum_lesson.id in completed_lesson_ids %}
+                                            <span
+                                                class="curriculum-completed-label"
+                                                title="Completed"
+                                                aria-label="Completed"
+                                            >
+                                                ✓
+                                            </span>
+                                        {% endif %}
 
-                        {% endfor %}
+                                    </li>
 
-                    </ul>
+                                {% empty %}
+
+                                    <li class="curriculum-empty">
+                                        No lessons in this section yet.
+                                    </li>
+
+                                {% endfor %}
+
+                            </ul>
+
+                        </div>
 
                     {% empty %}
 
-                    <p class="text-muted mb-0">
-                        No sections are available for this course.
-                    </p>
+                        <div class="curriculum-empty-overall">
+                            <span>📖</span>
+                            <p>No sections are available for this course.</p>
+                        </div>
 
                     {% endfor %}
 
                 </div>
-            </div>
 
-        </div>
+                <div class="learning-curriculum-footer">
+                    <a href="{% url 'course_detail' course.slug %}">
+                        View Course Details &rarr;
+                    </a>
+                </div>
+
+            </section>
+
+        </aside>
 
     </div>
 

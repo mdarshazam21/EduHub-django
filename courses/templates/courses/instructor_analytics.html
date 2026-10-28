@@ -4,54 +4,141 @@
 
 {% block content %}
 
-<h2 class="page-header">My Course Analytics</h2>
+<div class="instructor-analytics-page">
 
-<div class="table-wrapper">
+    <!-- Page Header -->
+    <div class="analytics-header">
+        <div>
+            <span class="analytics-eyebrow">INSTRUCTOR DASHBOARD</span>
+            <h1>Course Analytics</h1>
+            <p>Track enrollments, revenue, and student feedback across your courses.</p>
+        </div>
 
-    <table class="table">
+        <a href="{% url 'instructor_course_list' %}" class="analytics-back-btn">
+            &larr; My Courses
+        </a>
+    </div>
 
-        <thead>
-            <tr>
-                <th>Course</th>
-                <th>Enrollments</th>
-                <th>Revenue</th>
-                <th>Avg Rating</th>
-            </tr>
-        </thead>
+    <!-- Analytics Table -->
+    <section class="analytics-section">
 
-        <tbody>
+        <div class="analytics-section-header">
+            <div>
+                <h2>Performance Overview</h2>
+                <p>Detailed statistics for each of your courses.</p>
+            </div>
 
-            {% for item in analytics_data %}
+            <span class="analytics-course-count">
+                {{ analytics_data|length }} course{{ analytics_data|length|pluralize }}
+            </span>
+        </div>
 
-            <tr>
-                <td>{{ item.course.title }}</td>
+        <div class="analytics-table-wrapper">
 
-                <td>{{ item.total_enrollments }}</td>
+            <table class="analytics-table">
 
-                <td>₹{{ item.total_revenue|floatformat:2 }}</td>
+                <thead>
+                    <tr>
+                        <th>Course</th>
+                        <th>Enrollments</th>
+                        <th>Revenue</th>
+                        <th>Average Rating</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
 
-                <td>
-                    {% if item.avg_rating %}
-                    {{ item.avg_rating|floatformat:1 }}/5
-                    {% else %}
-                    No ratings
-                    {% endif %}
-                </td>
-            </tr>
+                <tbody>
 
-            {% empty %}
+                    {% for item in analytics_data %}
 
-            <tr>
-                <td colspan="4" class="empty-state">
-                    You haven't created any courses yet.
-                </td>
-            </tr>
+                    <tr>
+                        <td>
+                            <div class="analytics-course-name">
+                                <span class="analytics-course-icon">📘</span>
+                                <div>
+                                    <strong>{{ item.course.title }}</strong>
+                                    <span class="analytics-course-subtitle">
+                                        Course performance
+                                    </span>
+                                </div>
+                            </div>
+                        </td>
 
-            {% endfor %}
+                        <td>
+                            <span class="analytics-enrollment-value">
+                                {{ item.total_enrollments }}
+                            </span>
+                            <span class="analytics-cell-label">students</span>
+                        </td>
 
-        </tbody>
+                        <td>
+                            <span class="analytics-revenue-value">
+                                ₹{{ item.total_revenue|floatformat:2 }}
+                            </span>
+                        </td>
 
-    </table>
+                        <td>
+                            {% if item.avg_rating %}
+                                <span class="analytics-rating">
+                                    <span class="analytics-star">★</span>
+                                    {{ item.avg_rating|floatformat:1 }}
+                                    <span class="analytics-rating-total">/ 5</span>
+                                </span>
+                            {% else %}
+                                <span class="analytics-no-rating">
+                                    No ratings yet
+                                </span>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            <a
+                                href="{% url 'course_detail' item.course.slug %}"
+                                class="analytics-view-btn"
+                            >
+                                View Course
+                            </a>
+                        </td>
+                    </tr>
+
+                    {% empty %}
+
+                    <tr>
+                        <td colspan="5">
+                            <div class="analytics-empty-state">
+                                <div class="analytics-empty-icon">📊</div>
+                                <h3>No analytics available yet</h3>
+                                <p>
+                                    You haven't created any courses yet.
+                                    Create your first course to get started.
+                                </p>
+                                <a
+                                    href="{% url 'instructor_course_create' %}"
+                                    class="analytics-create-btn"
+                                >
+                                    + Create Course
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        <div class="analytics-footer-note">
+            <span>ⓘ</span>
+            <p>
+                Revenue and enrollment figures reflect the values provided by
+                your course analytics view.
+            </p>
+        </div>
+
+    </section>
 
 </div>
 

@@ -1,76 +1,182 @@
 {% extends "base.html" %}
 
+{% block title %}{{ page_title }} | EduHub{% endblock %}
+
 {% block content %}
-<div class="container mt-4 mb-5">
-    <div class="row justify-content-center">
-        <div class="col-md-9 col-lg-7">
 
-            <div class="card shadow-sm">
-                <div class="card-header">
-                    <h3 class="mb-0">{{ page_title }}</h3>
-                </div>
+<div class="instructor-lesson-form-page">
 
-                <div class="card-body">
-                    <p class="text-muted">
-                        Course: <strong>{{ course.title }}</strong><br>
-                        Section: <strong>{{ section.title }}</strong>
-                    </p>
+    <!-- Page Header -->
+    <div class="lesson-form-header">
+        <div>
+            <span class="lesson-form-eyebrow">COURSE CURRICULUM</span>
+            <h1>{{ page_title }}</h1>
+            <p>Create engaging lessons and organize learning materials for your students.</p>
+        </div>
 
-                    {% if lesson and lesson.video_file %}
-                        <div class="alert alert-info">
-                            A video is already uploaded.
-                            Leave the upload field empty to keep the existing video.
-                        </div>
-                    {% endif %}
+        <a href="{% url 'instructor_course_list' %}" class="lesson-form-back">
+            &larr; My Courses
+        </a>
+    </div>
 
-                    <form method="post" enctype="multipart/form-data">
-                        {% csrf_token %}
+    <!-- Main Layout -->
+    <div class="lesson-form-layout">
 
-                        {% if form.non_field_errors %}
-                            <div class="alert alert-danger">
-                                {{ form.non_field_errors }}
-                            </div>
-                        {% endif %}
+        <!-- Lesson Form -->
+        <section class="lesson-form-card">
 
-                        {% for field in form %}
-                            <div class="mb-3">
-                                <label for="{{ field.id_for_label }}"
-                                       class="form-label">
-                                    {{ field.label }}
-                                </label>
+            <div class="lesson-form-card-header">
+                <div class="lesson-form-icon">🎓</div>
 
-                                {{ field }}
-
-                                {% if field.help_text %}
-                                    <div class="form-text">
-                                        {{ field.help_text }}
-                                    </div>
-                                {% endif %}
-
-                                {% for error in field.errors %}
-                                    <div class="text-danger small">
-                                        {{ error }}
-                                    </div>
-                                {% endfor %}
-                            </div>
-                        {% endfor %}
-
-                        <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-primary">
-                                Save Lesson
-                            </button>
-
-                            <a href="{% url 'instructor_course_list' %}"
-                               class="btn btn-outline-secondary">
-                                Cancel
-                            </a>
-                        </div>
-                    </form>
+                <div>
+                    <h2>Lesson Details</h2>
+                    <p>Configure the lesson content and learning materials.</p>
                 </div>
             </div>
 
-        </div>
-    </div>
-</div>
-{% endblock %}
+            <div class="lesson-form-card-body">
 
+                <!-- Course and Section Information -->
+                <div class="lesson-context-card">
+
+                    <div class="lesson-context-item">
+                        <span class="lesson-context-label">COURSE</span>
+                        <strong>{{ course.title }}</strong>
+                    </div>
+
+                    <div class="lesson-context-divider"></div>
+
+                    <div class="lesson-context-item">
+                        <span class="lesson-context-label">SECTION</span>
+                        <strong>{{ section.title }}</strong>
+                    </div>
+
+                </div>
+
+                <!-- Existing Video Notice -->
+                {% if lesson and lesson.video_file %}
+                    <div class="lesson-existing-video">
+                        <span class="lesson-video-status-icon">✓</span>
+
+                        <div>
+                            <strong>Video already uploaded</strong>
+                            <p>
+                                Your lesson already has a video file.
+                                Leave the video upload field empty to keep
+                                the existing video.
+                            </p>
+                        </div>
+                    </div>
+                {% endif %}
+
+                <!-- Django Form -->
+                <form
+                    method="post"
+                    enctype="multipart/form-data"
+                    class="eduhub-lesson-form"
+                >
+                    {% csrf_token %}
+
+                    {% if form.non_field_errors %}
+                        <div class="lesson-form-error-summary">
+                            <strong>Please correct the following errors:</strong>
+                            {{ form.non_field_errors }}
+                        </div>
+                    {% endif %}
+
+                    {% for field in form %}
+
+                        <div class="lesson-form-field">
+
+                            <label for="{{ field.id_for_label }}">
+                                {{ field.label }}
+
+                                {% if field.field.required %}
+                                    <span class="lesson-required">*</span>
+                                {% endif %}
+                            </label>
+
+                            {{ field }}
+
+                            {% if field.help_text %}
+                                <div class="lesson-field-help">
+                                    {{ field.help_text }}
+                                </div>
+                            {% endif %}
+
+                            {% for error in field.errors %}
+                                <div class="lesson-field-error">
+                                    {{ error }}
+                                </div>
+                            {% endfor %}
+
+                        </div>
+
+                    {% endfor %}
+
+                    <!-- Form Actions -->
+                    <div class="lesson-form-actions">
+
+                        <button type="submit" class="lesson-save-btn">
+                            Save Lesson
+                        </button>
+
+                        <a
+                            href="{% url 'instructor_course_list' %}"
+                            class="lesson-cancel-btn"
+                        >
+                            Cancel
+                        </a>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </section>
+
+        <!-- Sidebar -->
+        <aside class="lesson-form-sidebar">
+
+            <div class="lesson-tips-card">
+                <div class="lesson-tips-icon">💡</div>
+
+                <h3>Lesson Creation Tips</h3>
+
+                <ul>
+                    <li>Use a clear and descriptive lesson title.</li>
+                    <li>Organize lesson content in a logical sequence.</li>
+                    <li>Keep explanations focused on the learning objective.</li>
+                    <li>Provide helpful resources when appropriate.</li>
+                    <li>Check uploaded files before saving your lesson.</li>
+                </ul>
+            </div>
+
+            <div class="lesson-course-summary">
+                <span class="lesson-summary-label">COURSE</span>
+
+                <h3>{{ course.title }}</h3>
+
+                <div class="lesson-summary-section">
+                    <span>Current section</span>
+                    <strong>{{ section.title }}</strong>
+                </div>
+
+                <p>
+                    Lessons are organized inside sections to help students
+                    progress through your course in a structured way.
+                </p>
+
+                <a href="{% url 'instructor_course_list' %}">
+                    Manage My Courses &rarr;
+                </a>
+            </div>
+
+        </aside>
+
+    </div>
+
+</div>
+
+{% endblock %}

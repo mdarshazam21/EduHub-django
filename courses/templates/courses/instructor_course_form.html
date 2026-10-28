@@ -1,68 +1,224 @@
 {% extends "base.html" %}
 
+{% block title %}{{ page_title }} | EduHub{% endblock %}
+
 {% block content %}
-<div class="container mt-4 mb-5">
 
-    <div class="row justify-content-center">
-        <div class="col-md-8 col-lg-7">
+<div class="instructor-form-page">
 
-            <div class="card shadow-sm">
-                <div class="card-body p-4">
+    <!-- ==================== PAGE HEADER ==================== -->
+    <header class="instructor-form-header">
 
-                    <h2 class="mb-4">{{ page_title }}</h2>
+        <div class="instructor-form-header-content">
 
-                    <form method="post" enctype="multipart/form-data">
-                        {% csrf_token %}
+            <a href="{% url 'instructor_course_list' %}" class="instructor-form-back-link">
+                &larr; Back to My Courses
+            </a>
 
-                        {% if form.non_field_errors %}
-                        <div class="alert alert-danger">
-                            {{ form.non_field_errors }}
-                        </div>
-                        {% endif %}
+            <span class="instructor-form-eyebrow">
+                INSTRUCTOR WORKSPACE
+            </span>
 
-                        {% for field in form %}
-                        <div class="mb-3">
+            <h1>{{ page_title }}</h1>
 
-                            <label for="{{ field.id_for_label }}" class="form-label">
-                                {{ field.label }}
-                            </label>
+            <p>
+                Create and organize your course content to provide
+                students with a valuable learning experience.
+            </p>
 
-                            {{ field }}
+        </div>
 
-                            {% if field.help_text %}
-                            <div class="form-text">
-                                {{ field.help_text }}
-                            </div>
+        <div class="instructor-form-header-icon" aria-hidden="true">
+            &#128218;
+        </div>
+
+    </header>
+
+
+    <!-- ==================== COURSE FORM ==================== -->
+    <div class="instructor-form-layout">
+
+        <main class="instructor-form-main">
+
+            <section class="instructor-form-card">
+
+                <div class="instructor-form-card-header">
+
+                    <div>
+                        <h2>Course Information</h2>
+
+                        <p>
+                            Complete the fields below to configure your course.
+                        </p>
+                    </div>
+
+                    <span class="instructor-form-required-note">
+                        * Required fields
+                    </span>
+
+                </div>
+
+
+                <form method="post" enctype="multipart/form-data" class="instructor-course-form">
+
+                    {% csrf_token %}
+
+
+                    <!-- GENERAL FORM ERRORS -->
+                    {% if form.non_field_errors %}
+
+                    <div class="instructor-form-error-summary" role="alert">
+
+                        <strong>
+                            Please correct the following errors:
+                        </strong>
+
+                        {{ form.non_field_errors }}
+
+                    </div>
+
+                    {% endif %}
+
+
+                    <!-- FORM FIELDS -->
+                    {% for field in form %}
+
+                    <div class="instructor-form-field
+                            {% if field.errors %}has-errors{% endif %}
+                            {% if field.field.widget.input_type == 'checkbox' %}instructor-checkbox-field{% endif %}
+                        ">
+
+                        <label for="{{ field.id_for_label }}" class="instructor-field-label">
+
+                            {{ field.label }}
+
+                            {% if field.field.required %}
+                            <span class="instructor-required-marker" aria-hidden="true">*</span>
                             {% endif %}
 
+                        </label>
+
+
+                        <!-- Render the original Django field -->
+                        <div class="instructor-field-control">
+                            {{ field }}
+                        </div>
+
+
+                        <!-- Help Text -->
+                        {% if field.help_text %}
+
+                        <div class="instructor-field-help">
+                            {{ field.help_text|safe }}
+                        </div>
+
+                        {% endif %}
+
+
+                        <!-- Field Errors -->
+                        {% if field.errors %}
+
+                        <div class="instructor-field-errors" role="alert">
+
                             {% for error in field.errors %}
-                            <div class="text-danger small">
-                                {{ error }}
-                            </div>
+
+                            <p>{{ error }}</p>
+
                             {% endfor %}
 
                         </div>
-                        {% endfor %}
 
-                        <div class="d-flex gap-2 mt-4">
+                        {% endif %}
 
-                            <button type="submit" class="btn btn-primary">
-                                Save Course
-                            </button>
+                    </div>
 
-                            <a href="{% url 'instructor_course_list' %}" class="btn btn-outline-secondary">
-                                Cancel
-                            </a>
+                    {% endfor %}
 
-                        </div>
 
-                    </form>
+                    <!-- FORM ACTIONS -->
+                    <div class="instructor-form-actions">
 
+                        <button type="submit" class="btn btn-primary instructor-form-submit">
+                            Save Course
+                            <span aria-hidden="true">&rarr;</span>
+                        </button>
+
+                        <a href="{% url 'instructor_course_list' %}" class="btn btn-outline instructor-form-cancel">
+                            Cancel
+                        </a>
+
+                    </div>
+
+                </form>
+
+            </section>
+
+        </main>
+
+
+        <!-- ==================== GUIDANCE SIDEBAR ==================== -->
+        <aside class="instructor-form-sidebar">
+
+            <section class="instructor-form-tip-card">
+
+                <div class="instructor-form-tip-icon" aria-hidden="true">
+                    &#128161;
                 </div>
-            </div>
 
-        </div>
+                <h3>Tips for a Great Course</h3>
+
+                <ul>
+                    <li>
+                        <strong>Choose a clear title.</strong>
+                        Make it easy for students to understand what they'll learn.
+                    </li>
+
+                    <li>
+                        <strong>Write a useful description.</strong>
+                        Explain the course goals and what students can expect.
+                    </li>
+
+                    <li>
+                        <strong>Select the right level.</strong>
+                        Match the difficulty to your intended audience.
+                    </li>
+
+                    <li>
+                        <strong>Use a relevant thumbnail.</strong>
+                        Choose an image that represents your course.
+                    </li>
+
+                    <li>
+                        <strong>Organize your content.</strong>
+                        Add sections and lessons after saving your course.
+                    </li>
+                </ul>
+
+            </section>
+
+
+            <section class="instructor-form-info-card">
+
+                <span class="instructor-form-info-icon" aria-hidden="true">
+                    &#128274;
+                </span>
+
+                <div>
+                    <h3>Your Course, Your Content</h3>
+
+                    <p>
+                        Review your course details before saving.
+                        You can return to your course list to manage
+                        your sections and lessons.
+                    </p>
+                </div>
+
+            </section>
+
+        </aside>
+
     </div>
 
 </div>
+
 {% endblock %}

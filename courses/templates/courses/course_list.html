@@ -1,68 +1,432 @@
 {% extends 'base.html' %}
+
 {% block title %}Browse Courses | EduHub{% endblock %}
 
 {% block content %}
-<div class="page-header">
-    <h2>Browse Courses</h2>
-</div>
 
-<div class="card">
-    <form method="get" class="filter-form">
-        <input type="text" name="q" value="{{ query }}" placeholder="Search courses">
-        <select name="level">
-            <option value="">All Levels</option>
-            {% for value, label in levels %}
-                <option value="{{ value }}" {% if level == value %}selected{% endif %}>{{ label }}</option>
-            {% endfor %}
-        </select>
-        <select name="price">
-            <option value="">All Prices</option>
-            <option value="free" {% if price_filter == 'free' %}selected{% endif %}>Free</option>
-            <option value="paid" {% if price_filter == 'paid' %}selected{% endif %}>Paid</option>
-        </select>
-        <button type="submit" class="btn btn-primary">Search</button>
-    </form>
-</div>
+<div class="browse-courses-page">
 
-<div class="course-grid">
-    {% for course in page_obj %}
-        <div class="card course-card">
-            {% if course.thumbnail %}
-                <img src="{{ course.thumbnail.url }}" alt="{{ course.title }}" class="course-thumbnail">
-            {% else %}
-                <div class="course-thumbnail"></div>
-            {% endif %}
-            <div class="course-card-body">
-                <h3>{{ course.title }}</h3>
-                <p class="instructor-name">by {{ course.instructor.username }}</p>
-                <div class="course-meta">
-                    <span class="badge badge-level">{{ course.get_level_display }}</span>
-                    {% if course.is_free %}
-                        <span class="badge badge-free">Free</span>
-                    {% else %}
-                        <span class="badge badge-paid">Paid</span>
-                    {% endif %}
-                </div>
-                {% if course.is_free %}
-                    <p class="price">Free</p>
-                {% else %}
-                    <p class="price paid">₹{{ course.price }}</p>
-                {% endif %}
-                <a href="{% url 'course_detail' course.slug %}" class="btn btn-outline btn-sm">View Course</a>
-            </div>
+    <!-- ==================== HERO HEADER ==================== -->
+    <section class="browse-hero">
+        <div class="browse-hero-content">
+
+            <span class="browse-eyebrow">LEARN SOMETHING NEW</span>
+
+            <h1>Discover Your Next Skill</h1>
+
+            <p>
+                Explore courses, learn at your own pace, and build
+                skills that move your career forward.
+            </p>
+
         </div>
-    {% empty %}
-        <p class="empty-state">No courses found matching your criteria.</p>
-    {% endfor %}
+    </section>
+
+
+    <!-- ==================== SEARCH AND FILTERS ==================== -->
+    <section class="browse-filter-panel">
+
+        <div class="browse-section-heading">
+
+            <div>
+                <h2>Explore Courses</h2>
+
+                <p>
+                    Find the right course for your learning goals.
+                </p>
+            </div>
+
+            <span class="browse-result-label">
+                {% if page_obj.paginator.count == 1 %}
+                    1 course available
+                {% else %}
+                    {{ page_obj.paginator.count }} courses available
+                {% endif %}
+            </span>
+
+        </div>
+
+
+        <form method="get" class="browse-filter-form">
+
+            <!-- Search -->
+            <div class="browse-search-field">
+
+                <label for="course-search">
+                    Search courses
+                </label>
+
+                <input
+                    type="search"
+                    id="course-search"
+                    name="q"
+                    value="{{ query }}"
+                    placeholder="e.g. Python, Django, Web Development"
+                    autocomplete="off"
+                >
+
+            </div>
+
+
+            <!-- Difficulty Level -->
+            <div class="browse-select-field">
+
+                <label for="course-level">
+                    Difficulty level
+                </label>
+
+                <select id="course-level" name="level">
+
+                    <option value="">
+                        All Levels
+                    </option>
+
+                    {% for value, label in levels %}
+
+                        <option
+                            value="{{ value }}"
+                            {% if level == value %}selected{% endif %}
+                        >
+                            {{ label }}
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+
+            <!-- Price Filter -->
+            <div class="browse-select-field">
+
+                <label for="course-price">
+                    Course price
+                </label>
+
+                <select id="course-price" name="price">
+
+                    <option value="">
+                        All Prices
+                    </option>
+
+                    <option
+                        value="free"
+                        {% if price_filter == 'free' %}selected{% endif %}
+                    >
+                        Free Courses
+                    </option>
+
+                    <option
+                        value="paid"
+                        {% if price_filter == 'paid' %}selected{% endif %}
+                    >
+                        Paid Courses
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- Filter Actions -->
+            <div class="browse-filter-actions">
+
+                <button
+                    type="submit"
+                    class="btn btn-primary"
+                >
+                    Search Courses
+                </button>
+
+                <a
+                    href="{% url 'course_list' %}"
+                    class="btn btn-outline"
+                >
+                    Clear Filters
+                </a>
+
+            </div>
+
+        </form>
+
+    </section>
+
+
+    <!-- ==================== COURSE RESULTS ==================== -->
+    <section class="browse-results">
+
+        <div class="browse-results-heading">
+
+            <div>
+                <h2>
+                    {% if query %}
+                        Results for "{{ query }}"
+                    {% else %}
+                        Available Courses
+                    {% endif %}
+                </h2>
+
+                {% if query or level or price_filter %}
+                    <p class="browse-active-filters">
+                        Showing courses that match your filters.
+                    </p>
+                {% endif %}
+            </div>
+
+        </div>
+
+
+        <!-- Course Grid -->
+        <div class="course-grid browse-course-grid">
+
+            {% for course in page_obj %}
+
+                <article class="card course-card browse-course-card">
+
+                    <!-- Course Thumbnail -->
+                    <a
+                        href="{% url 'course_detail' course.slug %}"
+                        class="browse-course-image-link"
+                        aria-label="View {{ course.title }}"
+                    >
+
+                        {% if course.thumbnail %}
+
+                            <img
+                                src="{{ course.thumbnail.url }}"
+                                alt="{{ course.title }}"
+                                class="course-thumbnail browse-course-thumbnail"
+                                loading="lazy"
+                            >
+
+                        {% else %}
+
+                            <div class="course-thumbnail browse-course-thumbnail browse-thumbnail-placeholder">
+                                <span class="browse-thumbnail-brand">
+                                    EduHub
+                                </span>
+
+                                <small>
+                                    Start learning today
+                                </small>
+                            </div>
+
+                        {% endif %}
+
+                    </a>
+
+
+                    <!-- Course Information -->
+                    <div class="course-card-body browse-course-body">
+
+                        <!-- Badges -->
+                        <div class="browse-course-badges">
+
+                            <span class="badge badge-level">
+                                {{ course.get_level_display }}
+                            </span>
+
+                            {% if course.is_free %}
+
+                                <span class="badge badge-free">
+                                    Free
+                                </span>
+
+                            {% else %}
+
+                                <span class="badge badge-paid">
+                                    Paid
+                                </span>
+
+                            {% endif %}
+
+                        </div>
+
+
+                        <!-- Course Title -->
+                        <h3 class="browse-course-title">
+
+                            <a href="{% url 'course_detail' course.slug %}">
+                                {{ course.title }}
+                            </a>
+
+                        </h3>
+
+
+                        <!-- Instructor -->
+                        <p class="instructor-name browse-instructor">
+
+                            <span
+                                class="browse-instructor-icon"
+                                aria-hidden="true"
+                            >
+                                &#128100;
+                            </span>
+
+                            <span>
+                                {{ course.instructor.username }}
+                            </span>
+
+                        </p>
+
+
+                        <!-- Description -->
+                        {% if course.description %}
+
+                            <p class="browse-course-description">
+                                {{ course.description|truncatewords:20 }}
+                            </p>
+
+                        {% else %}
+
+                            <p class="browse-course-description">
+                                Explore this course and start learning
+                                new skills at your own pace.
+                            </p>
+
+                        {% endif %}
+
+
+                        <!-- Price and Action -->
+                        <div class="browse-course-footer">
+
+                            <div class="browse-course-price">
+
+                                {% if course.is_free %}
+
+                                    <span class="browse-price-free">
+                                        Free
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="browse-price-paid">
+                                        ₹{{ course.price }}
+                                    </span>
+
+                                {% endif %}
+
+                            </div>
+
+
+                            <a
+                                href="{% url 'course_detail' course.slug %}"
+                                class="btn btn-primary browse-view-button"
+                            >
+                                View Course
+                                <span aria-hidden="true">&rarr;</span>
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </article>
+
+            {% empty %}
+
+                <!-- No Courses Found -->
+                <div class="browse-empty-state">
+
+                    <div
+                        class="browse-empty-icon"
+                        aria-hidden="true"
+                    >
+                        &#128269;
+                    </div>
+
+                    <h3>No courses found</h3>
+
+                    <p>
+                        We couldn't find any courses matching your search
+                        or filters. Try a different keyword or clear
+                        your filters.
+                    </p>
+
+                    <a
+                        href="{% url 'course_list' %}"
+                        class="btn btn-primary"
+                    >
+                        View All Courses
+                    </a>
+
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+    </section>
+
+
+    <!-- ==================== PAGINATION ==================== -->
+    {% if page_obj.paginator.num_pages > 1 %}
+
+        <nav
+            class="browse-pagination"
+            aria-label="Course pages"
+        >
+
+            <div class="browse-pagination-info">
+
+                Page <strong>{{ page_obj.number }}</strong>
+                of <strong>{{ page_obj.paginator.num_pages }}</strong>
+
+            </div>
+
+
+            <div class="browse-pagination-buttons">
+
+                <!-- Previous Page -->
+                {% if page_obj.has_previous %}
+
+                    <a
+                        href="?page={{ page_obj.previous_page_number }}&amp;q={{ query|urlencode }}&amp;level={{ level|urlencode }}&amp;price={{ price_filter|urlencode }}"
+                        class="btn btn-outline browse-page-button"
+                    >
+                        &larr; Previous
+                    </a>
+
+                {% else %}
+
+                    <span
+                        class="btn btn-outline browse-page-button is-disabled"
+                        aria-disabled="true"
+                    >
+                        &larr; Previous
+                    </span>
+
+                {% endif %}
+
+
+                <!-- Next Page -->
+                {% if page_obj.has_next %}
+
+                    <a
+                        href="?page={{ page_obj.next_page_number }}&amp;q={{ query|urlencode }}&amp;level={{ level|urlencode }}&amp;price={{ price_filter|urlencode }}"
+                        class="btn btn-primary browse-page-button"
+                    >
+                        Next &rarr;
+                    </a>
+
+                {% else %}
+
+                    <span
+                        class="btn btn-primary browse-page-button is-disabled"
+                        aria-disabled="true"
+                    >
+                        Next &rarr;
+                    </span>
+
+                {% endif %}
+
+            </div>
+
+        </nav>
+
+    {% endif %}
+
 </div>
 
-<div class="pagination">
-    {% if page_obj.has_previous %}
-        <a href="?page={{ page_obj.previous_page_number }}&q={{ query }}&level={{ level }}&price={{ price_filter }}" class="btn btn-outline btn-sm">← Previous</a>
-    {% endif %}
-    <span class="page-info">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
-    {% if page_obj.has_next %}
-        <a href="?page={{ page_obj.next_page_number }}&q={{ query }}&level={{ level }}&price={{ price_filter }}" class="btn btn-outline btn-sm">Next →</a>
-    {% endif %}
-</div>
 {% endblock %}

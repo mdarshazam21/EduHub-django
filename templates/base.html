@@ -38,6 +38,7 @@
 
                 {% if user.is_authenticated %}
 
+
                 <!-- Student Dashboard -->
                 {% if user.role == 'STUDENT' %}
                 <li>
@@ -46,6 +47,17 @@
                     </a>
                 </li>
                 {% endif %}
+
+                <!-- Instructor Dashboard -->
+                {% if user.role == 'INSTRUCTOR' %}
+                <li>
+                    <a href="{% url 'instructor_course_list' %}">
+                        Instructor Dashboard
+                    </a>
+                </li>
+                {% endif %}
+
+
 
                 <!-- Logged-in User -->
                 <li class="navbar-user">

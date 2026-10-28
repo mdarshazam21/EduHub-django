@@ -31,7 +31,12 @@ from rest_framework.filters import OrderingFilter
 
 def course_list(request):
     # Step 1: Get all published courses.
-    courses = Course.objects.filter(is_published=True)
+    if request.user.is_authenticated and request.user.role == "INSTRUCTOR":
+        courses = Course.objects.filter(
+            Q(is_published=True) | Q(instructor=request.user)
+        )
+    else:
+        courses = Course.objects.filter(is_published=True)
 
     # Step 2: Get the search query.
     query = request.GET.get("q", "").strip()
@@ -80,13 +85,20 @@ def course_list(request):
     )
 
 
-def course_detail(request, slug):  # type: ignore
-    course = get_object_or_404(
-        Course,
-        slug=slug,
-        is_published=True,
-    )
+def course_detail(request, slug):
+    # Find the course, whether published or unpublished.
+    course = get_object_or_404(Course, slug=slug)
 
+    # Determine whether the current user owns this course.
+    is_owner = request.user.is_authenticated and course.instructor_id == request.user.pk
+
+    # Students and other visitors must not access unpublished courses.
+    if not course.is_published and not is_owner:
+        from django.http import Http404
+
+        raise Http404("This course is not available.")
+
+    # Find the current user's enrollment, if one exists.
     enrollment = None
 
     if request.user.is_authenticated:
@@ -97,6 +109,7 @@ def course_detail(request, slug):  # type: ignore
 
     is_enrolled = enrollment is not None
 
+    # A paid course requires a paid enrollment to unlock its lessons.
     has_access = course.is_free or (enrollment is not None and enrollment.has_paid)
 
     context = {
@@ -104,6 +117,7 @@ def course_detail(request, slug):  # type: ignore
         "enrollment": enrollment,
         "is_enrolled": is_enrolled,
         "has_access": has_access,
+        "is_owner": is_owner,
     }
 
     return render(

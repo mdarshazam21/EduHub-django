@@ -1,90 +1,107 @@
 {% extends "base.html" %}
 
-{% block content %}
-<div class="container py-4">
+{% block title %}My Learning | EduHub{% endblock %}
 
-    <h1>My Learning</h1>
-    <p>Track your courses and continue learning.</p>
+{% block content %}
+
+<div class="my-learning-page">
+
+    <div class="my-learning-header">
+        <div>
+            <span class="my-learning-eyebrow">YOUR LEARNING SPACE</span>
+            <h1>My Learning</h1>
+            <p>Track your progress, revisit your courses, and keep moving forward.</p>
+        </div>
+
+        <a href="{% url 'course_list' %}" class="my-learning-browse-btn">
+            <span>+</span> Browse Courses
+        </a>
+    </div>
 
     {% if enrollments %}
 
-    <div class="course-list">
+    <div class="my-learning-summary">
+        <div class="my-learning-summary-icon">📚</div>
+        <div>
+            <span class="my-learning-summary-label">Your Learning Journey</span>
+            <h2>
+                {{ enrollments|length }}
+                Course{{ enrollments|length|pluralize }}
+            </h2>
+            <p>Pick up where you left off and continue building your skills.</p>
+        </div>
+    </div>
+
+    <div class="my-learning-course-list">
 
         {% for enrollment in enrollments %}
 
-        <div class="course-card">
+        <article class="my-learning-card">
 
-            <h2>{{ enrollment.course.title }}</h2>
+            <div class="my-learning-card-top">
+                <div class="my-learning-course-icon">📖</div>
 
-            <p>
+                <div class="my-learning-course-heading">
+                    <span class="my-learning-course-label">ENROLLED COURSE</span>
+                    <h2>{{ enrollment.course.title }}</h2>
+                    <p class="my-learning-instructor">
+                        Instructor:
+                        <strong>{{ enrollment.course.instructor.username }}</strong>
+                    </p>
+                </div>
+
+                {% if enrollment.course.is_free or enrollment.has_paid %}
+                <span class="my-learning-access-badge">Access available</span>
+                {% else %}
+                <span class="my-learning-payment-badge">Payment required</span>
+                {% endif %}
+            </div>
+
+            <p class="my-learning-description">
                 {{ enrollment.course.description|truncatewords:25 }}
             </p>
 
-            <p>
-                <strong>Instructor:</strong>
-                {{ enrollment.course.instructor.username }}
-            </p>
-
-            <p>
-                <strong>Enrolled:</strong>
-                {{ enrollment.enrolled_at|date:"M d, Y" }}
-            </p>
-
-            <hr>
-
-            <h3>Learning Progress</h3>
-
-            <p>
-                <strong>
-                    {{ enrollment.completed_lessons }}
-                </strong>
-                of
-                <strong>
-                    {{ enrollment.total_lessons }}
-                </strong>
-                lessons completed
-            </p>
-
-            <p>
-                <strong>
-                    {{ enrollment.progress_percentage }}%
-                </strong>
-                complete
-            </p>
-
-            <div role="progressbar" aria-label="Course completion progress"
-                aria-valuenow="{{ enrollment.progress_percentage }}" aria-valuemin="0" aria-valuemax="100" style="
-                            width: 100%;
-                            height: 14px;
-                            background-color: #e5e7eb;
-                            border-radius: 8px;
-                            overflow: hidden;
-                        ">
-                <div style="
-                                width: {{ enrollment.progress_percentage }}%;
-                                height: 100%;
-                                background-color: #7c3aed;
-                                border-radius: 8px;
-                            "></div>
+            <div class="my-learning-enrollment-date">
+                <span class="my-learning-date-icon">🗓</span>
+                Enrolled on
+                <strong>{{ enrollment.enrolled_at|date:"M d, Y" }}</strong>
             </div>
 
-            <br>
+            <div class="my-learning-progress-section">
+                <div class="my-learning-progress-heading">
+                    <h3>Learning Progress</h3>
+                    <span class="my-learning-progress-percentage">
+                        {{ enrollment.progress_percentage }}%
+                    </span>
+                </div>
 
-            {% if enrollment.course.is_free or enrollment.has_paid %}
+                <div class="my-learning-progress-track" role="progressbar"
+                    aria-label="{{ enrollment.course.title }} completion progress"
+                    aria-valuenow="{{ enrollment.progress_percentage }}" aria-valuemin="0" aria-valuemax="100">
+                    <div class="my-learning-progress-fill" style="width: {{ enrollment.progress_percentage }}%;"></div>
+                </div>
 
-            <a href="{% url 'course_detail' enrollment.course.slug %}">
-                Continue Learning
-            </a>
+                <p class="my-learning-progress-caption">
+                    <strong>{{ enrollment.completed_lessons }}</strong>
+                    of
+                    <strong>{{ enrollment.total_lessons }}</strong>
+                    lessons completed
+                </p>
+            </div>
 
-            {% else %}
+            <div class="my-learning-card-footer">
+                {% if enrollment.course.is_free or enrollment.has_paid %}
+                <a href="{% url 'course_detail' enrollment.course.slug %}" class="my-learning-continue-btn">
+                    Continue Learning <span aria-hidden="true">→</span>
+                </a>
+                {% else %}
+                <p class="my-learning-payment-message">
+                    Payment is required to access this course.
+                </p>
+                {% endif %}
+            </div>
 
-            <p>
-                Payment is required to access this course.
-            </p>
-
-            {% endif %}
-
-        </div>
+        </article>
 
         {% endfor %}
 
@@ -92,13 +109,20 @@
 
     {% else %}
 
-    <p>You haven't enrolled in any courses yet.</p>
-
-    <a href="{% url 'course_list' %}">
-        Browse Courses
-    </a>
+    <div class="my-learning-empty-state">
+        <div class="my-learning-empty-icon">🎓</div>
+        <h2>Your learning journey starts here</h2>
+        <p>
+            You haven't enrolled in any courses yet.
+            Explore the course library and find something new to learn.
+        </p>
+        <a href="{% url 'course_list' %}" class="my-learning-continue-btn">
+            Explore Courses <span aria-hidden="true">→</span>
+        </a>
+    </div>
 
     {% endif %}
+
 
 </div>
 {% endblock %}

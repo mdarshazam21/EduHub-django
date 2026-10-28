@@ -1,20 +1,89 @@
 {% extends 'base.html' %}
+
 {% block title %}Review {{ course.title }} | EduHub{% endblock %}
 
 {% block content %}
-<div class="card form-narrow">
-    <h3 class="card-title">Review "{{ course.title }}"</h3>
-    <form method="post">
-        {% csrf_token %}
-        <div class="form-group">
-            abel>{{ form.rating.label }}</label>
-            {{ form.rating }}
+
+<div class="review-page">
+
+
+    <div class="review-card">
+
+        <div class="review-icon">⭐</div>
+
+        <span class="review-eyebrow">SHARE YOUR EXPERIENCE</span>
+
+        <h1>Write a Review</h1>
+
+        <p class="review-subtitle">
+            Tell others what you think about this course.
+            Your feedback helps other students choose the right course.
+        </p>
+
+        <div class="review-course-info">
+            <span class="review-course-label">REVIEWING COURSE</span>
+            <h2>{{ course.title }}</h2>
         </div>
-        <div class="form-group">
-            abel>{{ form.comment.label }}</label>
-            {{ form.comment }}
-        </div>
-        <button type="submit" class="btn btn-primary btn-block">Submit Review</button>
-    </form>
+
+        <form method="post" class="review-form">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+            <div class="review-error-box">
+                {% for error in form.non_field_errors %}
+                <p>{{ error }}</p>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="review-form-group">
+                <label for="{{ form.rating.id_for_label }}">
+                    {{ form.rating.label }}
+                </label>
+
+                {{ form.rating }}
+
+                {% if form.rating.help_text %}
+                <small class="review-help-text">
+                    {{ form.rating.help_text }}
+                </small>
+                {% endif %}
+
+                {% for error in form.rating.errors %}
+                <p class="review-field-error">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <div class="review-form-group">
+                <label for="{{ form.comment.id_for_label }}">
+                    {{ form.comment.label }}
+                </label>
+
+                {{ form.comment }}
+
+                {% if form.comment.help_text %}
+                <small class="review-help-text">
+                    {{ form.comment.help_text }}
+                </small>
+                {% endif %}
+
+                {% for error in form.comment.errors %}
+                <p class="review-field-error">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <button type="submit" class="review-submit-btn">
+                Submit Review <span aria-hidden="true">→</span>
+            </button>
+
+        </form>
+
+        <p class="review-footer-note">
+            Please share honest and constructive feedback.
+        </p>
+
+    </div>
+
+
 </div>
 {% endblock %}

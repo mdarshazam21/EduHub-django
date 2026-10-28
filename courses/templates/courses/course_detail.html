@@ -4,212 +4,334 @@
 
 {% block content %}
 
-<!-- ==================== COURSE HEADER ==================== -->
-<div class="card">
-    <h1>{{ course.title }}</h1>
+<div class="course-detail-page">
 
-    <p class="instructor-name">
-        Instructor: {{ course.instructor.username }}
-    </p>
+    <!-- ==================== COURSE HEADER ==================== -->
+    <section class="course-detail-header">
 
-    <p>
-        <strong>Level:</strong>
-        {{ course.get_level_display }}
-    </p>
+        <h1>{{ course.title }}</h1>
 
-    <p>
-        <strong>Price:</strong>
-        {% if course.is_free %}
-        Free
-        {% else %}
-        ₹{{ course.price }}
-        {% endif %}
-    </p>
+        <p class="instructor-name">
+            Instructor:
+            <strong>{{ course.instructor.username }}</strong>
+        </p>
 
-    <div>
-        <strong>Description:</strong>
-        <p>{{ course.description|linebreaks }}</p>
-    </div>
+        <p>
+            <strong>Level:</strong>
+            {{ course.get_level_display }}
+        </p>
 
-    <!-- Enrollment Status -->
-    {% if user.is_authenticated %}
+        <p>
+            <strong>Price:</strong>
 
-    {% if user.role == 'STUDENT' %}
+            {% if course.is_free %}
+            <span class="badge badge-free">Free</span>
+            {% else %}
+            <strong>₹{{ course.price }}</strong>
+            {% endif %}
+        </p>
 
-    {% if is_enrolled %}
-
-    <p class="success-message">
-        You are enrolled in this course.
-    </p>
-
-    <a href="{% url 'student_dashboard' %}" class="btn btn-primary">
-        My Dashboard
-    </a>
-
-    {% elif course.is_free %}
-
-    <form method="post" action="{% url 'enroll_in_course' course.slug %}">
-        {% csrf_token %}
-
-        <button type="submit" class="btn btn-primary">
-            Enroll in Free Course
-        </button>
-    </form>
-
-    {% else %}
-
-    <p>
-        This is a paid course.
-        Price: ₹{{ course.price }}
-    </p>
-
-    <p>
-        Complete the enrollment process to access this course.
-    </p>
-
-    <form method="post" action="{% url 'enroll_in_course' course.slug %}">
-        {% csrf_token %}
-
-        <button type="submit" class="btn btn-primary">
-            Enroll in Paid Course
-        </button>
-    </form>
-
-    {% endif %}
-
-    {% endif %}
-
-    {% else %}
-
-    <p>Please log in to enroll in this course.</p>
-
-    <a href="{% url 'login' %}" class="btn btn-primary">
-        Login
-    </a>
-
-    {% endif %}
-</div>
-
-
-<!-- ==================== COURSE CURRICULUM ==================== -->
-<div class="card">
-    <h2>Course Curriculum</h2>
-
-    {% for section in course.sections.all %}
-    <div class="card">
-        <h3>{{ forloop.counter }}. {{ section.title }}</h3>
-
-        {% for lesson in section.lessons.all %}
-        <div class="lesson-item">
-
-            <div class="lesson-info">
-                <strong>{{ lesson.title }}</strong>
-
-                <p>
-                    {{ lesson.duration_minutes }} minutes
-                    — {{ lesson.get_content_type_display }}
-
-                    {% if lesson.is_preview %}
-                    <span>(Preview)</span>
-                    {% endif %}
-                </p>
-            </div>
-
-            <div class="lesson-actions">
-
-                <!-- Open lesson for enrolled students or preview visitors -->
-                {% if user.is_authenticated and user.role == 'STUDENT' %}
-                {% if is_enrolled or lesson.is_preview %}
-                <a href="{% url 'lesson_detail' course.slug lesson.id %}" class="btn btn-primary btn-sm">
-                    Open Lesson
-                </a>
-                {% endif %}
-                {% elif lesson.is_preview %}
-                <a href="{% url 'lesson_detail' course.slug lesson.id %}" class="btn btn-primary btn-sm">
-                    Preview Lesson
-                </a>
-                {% endif %}
-
-                <!-- Existing student completion and quiz actions -->
-                {% if user.is_authenticated and user.role == 'STUDENT' and is_enrolled %}
-
-                <form method="post" action="{% url 'mark_lesson_complete' lesson.id %}">
-                    {% csrf_token %}
-
-                    <button type="submit" class="btn btn-outline btn-sm">
-                        Mark Complete
-                    </button>
-                </form>
-
-                {% if lesson.quiz %}
-                <a href="{% url 'take_quiz' lesson.quiz.id %}" class="btn btn-primary btn-sm">
-                    Take Quiz
-                </a>
-                {% endif %}
-
-                {% endif %}
-
+        <div class="course-description">
+            <strong>Description:</strong>
+            <div>
+                {{ course.description|linebreaks }}
             </div>
         </div>
 
-        {% empty %}
-        <p>No lessons have been added to this section yet.</p>
-        {% endfor %}
 
-    </div>
+        <!-- ==================== ENROLLMENT STATUS ==================== -->
 
-    {% empty %}
-    <p>No sections have been added to this course yet.</p>
-    {% endfor %}
+        {% if user.is_authenticated %}
 
-</div>
+        {% if user.role == 'INSTRUCTOR' %}
 
-<!-- ==================== STUDENT REVIEWS ==================== -->
-<div class="card">
+        {% if is_owner %}
+        <div class="course-owner-notice">
+            <p>
+                You are viewing your own course as an instructor.
+            </p>
+        </div>
+        {% endif %}
 
-    <h2>Student Reviews</h2>
+        {% elif user.role == 'STUDENT' %}
 
-    {% if reviews %}
+        {% if is_enrolled %}
 
-    {% for review in reviews %}
-
-    <div class="review-item">
-
-        <h4>{{ review.student.username }}</h4>
-
-        <p>
-            <strong>Rating:</strong>
-            {{ review.rating }}/5
+        <p class="success-message">
+            You are enrolled in this course.
         </p>
 
-        <p>{{ review.comment|linebreaks }}</p>
+        <a href="{% url 'student_dashboard' %}" class="btn btn-primary">
+            Go to My Dashboard
+        </a>
 
-        <small>
-            {{ review.created_at|date:"F d, Y" }}
-        </small>
+        {% elif course.is_free %}
 
-    </div>
+        <form method="post" action="{% url 'enroll_in_course' course.slug %}">
 
-    <hr>
+            {% csrf_token %}
 
-    {% endfor %}
+            <button type="submit" class="btn btn-primary">
+                Enroll in Free Course
+            </button>
 
-    {% else %}
+        </form>
 
-    <p>
-        No reviews yet. Be the first to review this course.
-    </p>
+        {% else %}
 
-    {% endif %}
+        <p>
+            This is a paid course.
+            Price: <strong>₹{{ course.price }}</strong>
+        </p>
 
-    <!-- Review Form Link -->
-    {% if user.is_authenticated and user.role == 'STUDENT' and is_enrolled %}
+        <p>
+            Complete the enrollment process to access this course.
+        </p>
 
-    <a href="{% url 'submit_review' course.slug %}" class="btn btn-outline">
-        Write a Review
-    </a>
+        <form method="post" action="{% url 'enroll_in_course' course.slug %}">
 
-    {% endif %}
+            {% csrf_token %}
+
+            <button type="submit" class="btn btn-primary">
+                Enroll in Paid Course
+            </button>
+
+        </form>
+
+        {% endif %}
+
+        {% endif %}
+
+        {% else %}
+
+        <div class="course-login-notice">
+            <p>Please log in to enroll in this course.</p>
+
+            <a href="{% url 'login' %}" class="btn btn-primary">
+                Log In to Enroll
+            </a>
+        </div>
+
+        {% endif %}
+
+    </section>
+
+
+    <!-- ==================== COURSE CURRICULUM ==================== -->
+    <section class="course-curriculum">
+
+        <div class="curriculum-header">
+            <h2>Course Curriculum</h2>
+
+            <p>
+                {% with sections=course.sections.all %}
+                {{ sections|length }} section(s)
+                {% endwith %}
+            </p>
+        </div>
+
+
+        {% for section in course.sections.all %}
+
+        <article class="course-section-card">
+
+            <!-- SECTION TITLE -->
+            <div class="course-section-heading">
+
+                <h3>
+                    {{ forloop.counter }}. {{ section.title }}
+                </h3>
+
+            </div>
+
+
+            <!-- ==================== LESSONS ==================== -->
+            <div class="course-lesson-list">
+
+                {% for lesson in section.lessons.all %}
+
+                <div class="course-lesson-card">
+
+                    <!-- LESSON INFORMATION -->
+                    <div class="course-lesson-info">
+
+                        <strong class="course-lesson-title">
+                            {{ lesson.title }}
+                        </strong>
+
+                        <p>
+                            {{ lesson.duration_minutes }} minutes
+                            &mdash;
+                            {{ lesson.get_content_type_display }}
+
+                            {% if lesson.is_preview %}
+                            <span class="badge badge-free">
+                                Preview
+                            </span>
+                            {% endif %}
+                        </p>
+
+                    </div>
+
+
+                    <!-- LESSON ACTIONS -->
+                    <div class="course-lesson-actions">
+
+                        <!-- Instructor: Open lesson management -->
+                        {% if user.is_authenticated and is_owner %}
+
+                        <a href="{% url 'instructor_lesson_edit' lesson.id %}" class="btn btn-outline btn-sm">
+                            Manage Lesson
+                        </a>
+
+                        {% endif %}
+
+
+                        <!-- Student: Open lessons when enrolled or previewable -->
+                        {% if user.is_authenticated and user.role == 'STUDENT' %}
+
+                        {% if is_enrolled or lesson.is_preview %}
+
+                        <a href="{% url 'lesson_detail' course.slug lesson.id %}" class="btn btn-primary btn-sm">
+                            {% if lesson.is_preview and not is_enrolled %}
+                            Preview Lesson
+                            {% else %}
+                            Open Lesson
+                            {% endif %}
+                        </a>
+
+                        {% endif %}
+
+                        {% elif not user.is_authenticated and lesson.is_preview %}
+
+                        <a href="{% url 'lesson_detail' course.slug lesson.id %}" class="btn btn-primary btn-sm">
+                            Preview Lesson
+                        </a>
+
+                        {% endif %}
+
+
+                        <!-- Mark lesson complete -->
+                        {% if user.is_authenticated and user.role == 'STUDENT' and is_enrolled %}
+
+                        <form method="post" action="{% url 'mark_lesson_complete' lesson.id %}">
+
+                            {% csrf_token %}
+
+                            <button type="submit" class="btn btn-outline btn-sm">
+                                Mark Complete
+                            </button>
+
+                        </form>
+
+
+                        <!-- Quiz -->
+                        {% if lesson.quiz %}
+
+                        <a href="{% url 'take_quiz' lesson.quiz.id %}" class="btn btn-primary btn-sm">
+                            Take Quiz
+                        </a>
+
+                        {% endif %}
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+                {% empty %}
+
+                <div class="course-empty-state">
+                    <p>
+                        No lessons have been added to this section yet.
+                    </p>
+                </div>
+
+                {% endfor %}
+
+            </div>
+
+        </article>
+
+        {% empty %}
+
+        <div class="course-empty-state">
+            <h3>No curriculum available yet</h3>
+
+            <p>
+                The instructor has not added any sections to this course.
+            </p>
+        </div>
+
+        {% endfor %}
+
+    </section>
+
+
+    <!-- ==================== STUDENT REVIEWS ==================== -->
+    <section class="course-reviews">
+
+        <div class="reviews-header">
+            <h2>Student Reviews</h2>
+        </div>
+
+
+        {% if reviews %}
+
+        {% for review in reviews %}
+
+        <article class="course-review-item">
+
+            <div class="review-heading">
+
+                <h4>
+                    {{ review.student.username }}
+                </h4>
+
+                <span class="review-rating">
+                    {{ review.rating }}/5
+                </span>
+
+            </div>
+
+            <div class="review-comment">
+                {{ review.comment|linebreaks }}
+            </div>
+
+            <small class="review-date">
+                {{ review.created_at|date:"F d, Y" }}
+            </small>
+
+        </article>
+
+        {% endfor %}
+
+        {% else %}
+
+        <div class="course-empty-state">
+            <p>
+                No reviews yet. Be the first to review this course.
+            </p>
+        </div>
+
+        {% endif %}
+
+
+        <!-- REVIEW FORM LINK -->
+        {% if user.is_authenticated and user.role == 'STUDENT' and is_enrolled %}
+
+        <div class="review-actions">
+
+            <a href="{% url 'submit_review' course.slug %}" class="btn btn-outline">
+                Write a Review
+            </a>
+
+        </div>
+
+        {% endif %}
+
+    </section>
 
 </div>
 

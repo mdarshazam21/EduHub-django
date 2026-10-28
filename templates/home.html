@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+
+{% block title %}Home | EduHub{% endblock %}
+
+{% block content %}
+
+<section class="hero-section">
+
+    <div class="hero-content">
+
+        <span class="hero-label">
+            YOUR LEARNING JOURNEY STARTS HERE
+        </span>
+
+        <h1>
+            Learn New Skills.<br>
+            Build Your Future.
+        </h1>
+
+        <p>
+            Discover courses, learn from expert instructors,
+            and develop practical skills at your own pace.
+        </p>
+
+        <div class="hero-actions">
+
+            <a href="{% url 'course_list' %}" class="btn btn-primary">
+                Explore Courses
+            </a>
+
+            {% if not user.is_authenticated %}
+
+            <a href="{% url 'register' %}" class="btn btn-outline">
+                Get Started
+            </a>
+
+            {% elif user.role == 'STUDENT' %}
+
+            <a href="{% url 'student_dashboard' %}" class="btn btn-outline">
+                My Dashboard
+            </a>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</section>
+
+<section class="features-section">
+
+    <div class="section-heading">
+        <h2>Why Learn with EduHub?</h2>
+        <p>Everything you need to keep moving forward.</p>
+    </div>
+
+    <div class="features-grid">
+
+        <article class="card feature-card">
+            <div class="feature-icon">📚</div>
+            <h3>Explore Courses</h3>
+            <p>
+                Discover courses covering different subjects
+                and skill levels.
+            </p>
+        </article>
+
+        <article class="card feature-card">
+            <div class="feature-icon">🎯</div>
+            <h3>Track Your Progress</h3>
+            <p>
+                Track completed lessons and monitor your
+                learning progress.
+            </p>
+        </article>
+
+        <article class="card feature-card">
+            <div class="feature-icon">🏆</div>
+            <h3>Build Your Skills</h3>
+            <p>
+                Work through lessons and quizzes to reinforce
+                your knowledge.
+            </p>
+        </article>
+
+    </div>
+
+</section>
+
+<section class="cta-section">
+
+    <div class="card cta-card">
+
+        <h2>Ready to Start Learning?</h2>
+
+        <p>
+            Explore the available courses and take your next step.
+        </p>
+
+        <a href="{% url 'course_list' %}" class="btn btn-primary">
+            Browse All Courses
+        </a>
+
+    </div>
+
+</section>
+
+{% endblock %}

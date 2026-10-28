@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% block title %}Browse Courses | EduHub{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>Browse Courses</h2>
+</div>
+
+<div class="card">
+    <form method="get" class="filter-form">
+        <input type="text" name="q" value="{{ query }}" placeholder="Search courses">
+        <select name="level">
+            <option value="">All Levels</option>
+            {% for value, label in levels %}
+                <option value="{{ value }}" {% if level == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+        <select name="price">
+            <option value="">All Prices</option>
+            <option value="free" {% if price_filter == 'free' %}selected{% endif %}>Free</option>
+            <option value="paid" {% if price_filter == 'paid' %}selected{% endif %}>Paid</option>
+        </select>
+        <button type="submit" class="btn btn-primary">Search</button>
+    </form>
+</div>
+
+<div class="course-grid">
+    {% for course in page_obj %}
+        <div class="card course-card">
+            {% if course.thumbnail %}
+                <img src="{{ course.thumbnail.url }}" alt="{{ course.title }}" class="course-thumbnail">
+            {% else %}
+                <div class="course-thumbnail"></div>
+            {% endif %}
+            <div class="course-card-body">
+                <h3>{{ course.title }}</h3>
+                <p class="instructor-name">by {{ course.instructor.username }}</p>
+                <div class="course-meta">
+                    <span class="badge badge-level">{{ course.get_level_display }}</span>
+                    {% if course.is_free %}
+                        <span class="badge badge-free">Free</span>
+                    {% else %}
+                        <span class="badge badge-paid">Paid</span>
+                    {% endif %}
+                </div>
+                {% if course.is_free %}
+                    <p class="price">Free</p>
+                {% else %}
+                    <p class="price paid">₹{{ course.price }}</p>
+                {% endif %}
+                <a href="{% url 'course_detail' course.slug %}" class="btn btn-outline btn-sm">View Course</a>
+            </div>
+        </div>
+    {% empty %}
+        <p class="empty-state">No courses found matching your criteria.</p>
+    {% endfor %}
+</div>
+
+<div class="pagination">
+    {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}&q={{ query }}&level={{ level }}&price={{ price_filter }}" class="btn btn-outline btn-sm">← Previous</a>
+    {% endif %}
+    <span class="page-info">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}&q={{ query }}&level={{ level }}&price={{ price_filter }}" class="btn btn-outline btn-sm">Next →</a>
+    {% endif %}
+</div>
+{% endblock %}

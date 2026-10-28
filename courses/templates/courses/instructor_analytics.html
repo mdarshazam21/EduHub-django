@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block title %}Instructor Analytics | EduHub{% endblock %}
+
+{% block content %}
+
+<h2 class="page-header">My Course Analytics</h2>
+
+<div class="table-wrapper">
+
+    <table class="table">
+
+        <thead>
+            <tr>
+                <th>Course</th>
+                <th>Enrollments</th>
+                <th>Revenue</th>
+                <th>Avg Rating</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            {% for item in analytics_data %}
+
+            <tr>
+                <td>{{ item.course.title }}</td>
+
+                <td>{{ item.total_enrollments }}</td>
+
+                <td>₹{{ item.total_revenue|floatformat:2 }}</td>
+
+                <td>
+                    {% if item.avg_rating %}
+                    {{ item.avg_rating|floatformat:1 }}/5
+                    {% else %}
+                    No ratings
+                    {% endif %}
+                </td>
+            </tr>
+
+            {% empty %}
+
+            <tr>
+                <td colspan="4" class="empty-state">
+                    You haven't created any courses yet.
+                </td>
+            </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</div>
+
+{% endblock %}

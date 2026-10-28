@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block title %}Review {{ course.title }} | EduHub{% endblock %}
+
+{% block content %}
+<div class="card form-narrow">
+    <h3 class="card-title">Review "{{ course.title }}"</h3>
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            abel>{{ form.rating.label }}</label>
+            {{ form.rating }}
+        </div>
+        <div class="form-group">
+            abel>{{ form.comment.label }}</label>
+            {{ form.comment }}
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">Submit Review</button>
+    </form>
+</div>
+{% endblock %}

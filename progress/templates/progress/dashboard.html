@@ -1,0 +1,160 @@
+{% extends 'base.html' %}
+
+{% block title %}My Dashboard | EduHub{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+    <h2>My Learning Dashboard</h2>
+</div>
+
+{% for item in dashboard_data %}
+
+<div class="card">
+
+    <!-- Course Information -->
+    <div class="course-detail-header">
+
+        <div>
+            <h3>{{ item.course.title }}</h3>
+
+            <p class="instructor-name">
+                by {{ item.course.instructor.username }}
+            </p>
+        </div>
+
+        <a href="{% url 'course_detail' item.course.slug %}" class="btn btn-outline btn-sm">
+            Continue Learning
+        </a>
+
+    </div>
+
+    <!-- Course Progress Bar -->
+    <div class="progress-bar-track" role="progressbar" aria-valuenow="{{ item.percent }}" aria-valuemin="0"
+        aria-valuemax="100" aria-label="Course completion">
+
+        <div class="progress-bar-fill" style="width: {{ item.percent }}%;">
+        </div>
+
+    </div>
+
+    <!-- Progress Information -->
+    <p style="margin-top: 8px; color: var(--color-text-muted); font-size: 0.9rem;">
+        {{ item.completed_lessons }} of {{ item.total_lessons }}
+        lessons completed ({{ item.percent }}%)
+    </p>
+
+    <!-- Quiz Results Section -->
+    <div class="quiz-results-section" style="margin-top: 24px;">
+
+        <h4>📝 Quiz Results</h4>
+
+        {% for attempt in item.quiz_attempts %}
+
+        <div style="margin: 12px 0; padding: 12px; border: 1px solid var(--color-border, #ddd); border-radius: 8px;">
+
+            <h5>{{ attempt.quiz.title }}</h5>
+
+            <p>
+                Score: <strong>{{ attempt.score }}%</strong>
+            </p>
+
+            {% if attempt.passed %}
+            <p>✅ <strong>Passed</strong></p>
+            {% else %}
+            <p>❌ <strong>Not Passed</strong></p>
+            {% endif %}
+
+            <p style="font-size: 0.85rem; color: var(--color-text-muted);">
+                Attempted: {{ attempt.attempted_at|date:"M d, Y H:i" }}
+            </p>
+
+        </div>
+
+        {% empty %}
+
+        <p style="color: var(--color-text-muted);">
+            You haven't attempted any quizzes for this course yet.
+        </p>
+
+        {% endfor %}
+
+    </div>
+
+
+    <!-- Certificate Section -->
+    {% if item.certificate %}
+
+    <div class="certificate-section" style="margin-top: 20px;">
+
+        <h4>🎓 Course Certificate</h4>
+
+        <p>
+            Congratulations! You've completed
+            {{ item.course.title }}.
+        </p>
+
+        <a href="{% url 'view_certificate' item.certificate.certificate_id %}" class="btn btn-primary">
+            View Certificate
+        </a>
+
+        <a href="{% url 'download_certificate' item.certificate.certificate_id %}" class="btn btn-outline">
+            Download Certificate PDF
+        </a>
+
+    </div>
+
+    {% elif item.can_generate_certificate %}
+
+    <div class="certificate-section" style="margin-top: 20px;">
+
+        <h4>🎓 Course Completed!</h4>
+
+        <p>
+            You've completed all lessons and passed all required quizzes.
+            You're eligible to receive your certificate.
+        </p>
+
+        <a href="{% url 'generate_certificate' item.course.slug %}" class="btn btn-primary">
+            Generate Certificate
+        </a>
+
+    </div>
+
+    {% elif item.percent == 100 %}
+
+    <div class="certificate-section" style="margin-top: 20px;">
+
+        <h4>🎓 Lessons Completed!</h4>
+
+        <p>
+            You've completed all lessons, but you still need to pass
+            one or more required quizzes before receiving your certificate.
+        </p>
+
+    </div>
+
+    {% endif %}
+
+
+
+</div>
+
+{% empty %}
+
+<!-- No Enrolled Courses -->
+<div class="card">
+
+    <p class="empty-state">
+        You haven't enrolled in any courses yet.
+    </p>
+
+    <a href="{% url 'course_list' %}" class="btn btn-primary">
+        Browse Courses
+    </a>
+
+</div>
+
+{% endfor %}
+
+{% endblock %}

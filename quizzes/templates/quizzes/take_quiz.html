@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ quiz.title }} | EduHub{% endblock %}
+
+{% block content %}
+
+<div class="card">
+
+    <h2>{{ quiz.title }}</h2>
+
+    <p style="color: var(--color-text-muted); margin-bottom: 20px;">
+        Passing score: {{ quiz.passing_score }}%
+    </p>
+
+    <form method="post">
+
+        {% csrf_token %}
+
+        {% for question in questions %}
+
+        <div class="quiz-question">
+
+            <p class="quiz-question-text">
+                {{ forloop.counter }}. {{ question.text }}
+            </p>
+
+            {% for choice in question.choices.all %}
+
+            <label class="quiz-choice">
+
+                <input type="radio" name="question_{{ question.id }}" value="{{ choice.id }}" required>
+
+                {{ choice.text }}
+
+            </label>
+
+            {% empty %}
+
+            <p>This question has no answer choices yet.</p>
+
+            {% endfor %}
+
+        </div>
+
+        {% empty %}
+
+        <p>This quiz does not have any questions yet.</p>
+
+        {% endfor %}
+
+        {% if questions %}
+        <button type="submit" class="btn btn-primary btn-block">
+            Submit Quiz
+        </button>
+        {% endif %}
+
+    </form>
+
+</div>
+
+{% endblock %}

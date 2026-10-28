@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+
+{% block title %}{{ lesson.title }} | EduHub{% endblock %}
+
+{% block content %}
+
+<div class="container mt-4 mb-5">
+
+    <!-- Course and lesson heading -->
+    <div class="mb-4">
+        <a href="{% url 'course_detail' course.slug %}" class="btn btn-outline-secondary btn-sm mb-3">
+            &larr; Back to Course
+        </a>
+
+        <h2>{{ lesson.title }}</h2>
+
+        <p class="text-muted mb-1">
+            <strong>Course:</strong> {{ course.title }}
+        </p>
+
+        <p class="text-muted">
+            <strong>Section:</strong> {{ section.title }}
+            {% if lesson.duration_minutes %}
+            | <strong>Duration:</strong> {{ lesson.duration_minutes }} minutes
+            {% endif %}
+        </p>
+    </div>
+
+    <div class="row">
+
+        <!-- Main lesson content -->
+        <div class="col-lg-8">
+
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+
+                    {% if lesson.content_type == "VIDEO" %}
+
+                    {% if lesson.video_file %}
+                    <video controls preload="metadata"
+                        style="width: 100%; max-height: 480px; background: #000; border-radius: 8px;">
+                        <source src="{{ lesson.video_file.url }}" type="video/mp4">
+                        Your browser does not support HTML video.
+                    </video>
+                    {% else %}
+                    <div class="alert alert-warning">
+                        The instructor has not uploaded a video for this lesson yet.
+                    </div>
+                    {% endif %}
+
+                    {% elif lesson.content_type == "TEXT" %}
+
+                    <div class="lesson-text-content">
+                        {{ lesson.text_content|linebreaks }}
+                    </div>
+
+                    {% else %}
+
+                    <div class="alert alert-info">
+                        No supported content is available for this lesson.
+                    </div>
+
+                    {% endif %}
+
+                </div>
+            </div>
+
+            <!-- Lesson completion -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+
+                    {% if is_completed %}
+
+                    <div class="alert alert-success mb-3">
+                        <strong>Completed!</strong>
+                        You've finished this lesson.
+                    </div>
+
+                    {% else %}
+
+                    <h5>Have you finished this lesson?</h5>
+
+                    <p class="text-muted">
+                        Mark this lesson as complete to track your learning progress.
+                    </p>
+
+                    <form method="post" action="{% url 'mark_lesson_complete' lesson.id %}">
+                        {% csrf_token %}
+
+                        <button type="submit" class="btn btn-success">
+                            Mark as Complete
+                        </button>
+                    </form>
+
+                    {% endif %}
+
+                </div>
+            </div>
+
+            <!-- Previous and next lesson navigation -->
+            <div class="d-flex justify-content-between gap-3">
+
+                <div>
+                    {% if previous_lesson %}
+                    <a href="{% url 'lesson_detail' course.slug previous_lesson.id %}" class="btn btn-outline-primary">
+                        &larr; Previous Lesson
+                    </a>
+                    {% endif %}
+                </div>
+
+                <div>
+                    {% if next_lesson %}
+                    <a href="{% url 'lesson_detail' course.slug next_lesson.id %}" class="btn btn-primary">
+                        Next Lesson &rarr;
+                    </a>
+                    {% else %}
+                    <a href="{% url 'course_detail' course.slug %}" class="btn btn-outline-primary">
+                        Back to Course
+                    </a>
+                    {% endif %}
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Course curriculum -->
+        <div class="col-lg-4">
+
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0">Course Curriculum</h5>
+                </div>
+
+                <div class="card-body">
+
+                    {% for curriculum_section in curriculum_sections %}
+
+                    <h6 class="mt-2">
+                        {{ curriculum_section.title }}
+                    </h6>
+
+                    <ul class="list-group list-group-flush mb-3">
+
+                        {% for curriculum_lesson in curriculum_section.lessons.all %}
+
+                        <li class="list-group-item px-0">
+
+                            <a href="{% url 'lesson_detail' course.slug curriculum_lesson.id %}"
+                                class="text-decoration-none {% if curriculum_lesson.id == lesson.id %}fw-bold{% endif %}">
+
+                                {% if curriculum_lesson.id == lesson.id %}
+                                ▶
+                                {% endif %}
+
+                                {{ curriculum_lesson.title }}
+
+                            </a>
+
+                            {% if curriculum_lesson.id in completed_lesson_ids %}
+                            <span class="text-success float-end" title="Completed">
+                                ✓
+                            </span>
+                            {% endif %}
+
+                        </li>
+
+                        {% empty %}
+
+                        <li class="list-group-item px-0 text-muted">
+                            No lessons in this section yet.
+                        </li>
+
+                        {% endfor %}
+
+                    </ul>
+
+                    {% empty %}
+
+                    <p class="text-muted mb-0">
+                        No sections are available for this course.
+                    </p>
+
+                    {% endfor %}
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

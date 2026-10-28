@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4 mb-5">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2>My Courses</h2>
+            <p class="text-muted">Manage your courses, sections, and lessons.</p>
+        </div>
+
+        <a href="{% url 'instructor_course_create' %}" class="btn btn-primary">
+            Create New Course
+        </a>
+    </div>
+
+    {% if courses %}
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle">
+
+            <thead class="table-light">
+                <tr>
+                    <th>Thumbnail</th>
+                    <th>Course Title</th>
+                    <th>Level</th>
+                    <th>Price</th>
+                    <th>Status</th>
+                    <th>Content</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for course in courses %}
+                <tr>
+                    <td>
+                        {% if course.thumbnail %}
+                        <img src="{{ course.thumbnail.url }}" alt="{{ course.title }}" width="80" height="50"
+                            style="object-fit: cover;">
+                        {% else %}
+                        <span class="text-muted">No image</span>
+                        {% endif %}
+                    </td>
+
+                    <td>{{ course.title }}</td>
+
+                    <td>{{ course.get_level_display }}</td>
+
+                    <td>
+                        {% if course.is_free %}
+                        Free
+                        {% else %}
+                        {{ course.price }}
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {% if course.is_published %}
+                        <span class="badge bg-success">Published</span>
+                        {% else %}
+                        <span class="badge bg-secondary">Draft</span>
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        <div class="d-flex flex-column gap-2">
+                            <a href="{% url 'instructor_section_create' course.slug %}"
+                                class="btn btn-sm btn-outline-success">
+                                Add Section
+                            </a>
+
+                            {% for section in course.sections.all %}
+                            <div class="border rounded p-2">
+                                <strong>
+                                    {{ section.order }}.
+                                    {{ section.title }}
+                                </strong>
+
+                                <div class="small text-muted mb-2">
+                                    {{ section.lessons.count }} lesson(s)
+                                </div>
+
+                                <div class="d-flex flex-wrap gap-1">
+                                    <a href="{% url 'instructor_section_edit' section.id %}"
+                                        class="btn btn-sm btn-outline-primary">
+                                        Edit Section
+                                    </a>
+
+                                    <a href="{% url 'instructor_lesson_create' section.id %}"
+                                        class="btn btn-sm btn-outline-success">
+                                        Add Lesson
+                                    </a>
+                                </div>
+
+                                {% for lesson in section.lessons.all %}
+                                <div class="mt-2 ps-2 border-start">
+                                    <span>{{ lesson.order }}. {{ lesson.title }}</span>
+
+                                    <div class="d-flex flex-wrap gap-1 mt-1">
+                                        <a href="{% url 'instructor_lesson_edit' lesson.id %}"
+                                            class="btn btn-sm btn-outline-primary">
+                                            Edit
+                                        </a>
+
+                                        <form method="post" action="{% url 'instructor_lesson_delete' lesson.id %}"
+                                            onsubmit="return confirm('Delete this lesson? This action cannot be undone.');">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                Delete
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                                {% empty %}
+                                <p class="small text-muted mt-2 mb-0">
+                                    No lessons yet.
+                                </p>
+                                {% endfor %}
+
+                                <form method="post" action="{% url 'instructor_section_delete' section.id %}"
+                                    class="mt-2"
+                                    onsubmit="return confirm('Delete this section and all its lessons? This action cannot be undone.');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                        Delete Section
+                                    </button>
+                                </form>
+                            </div>
+                            {% empty %}
+                            <p class="small text-muted mb-0">
+                                No sections yet.
+                            </p>
+                            {% endfor %}
+                        </div>
+                    </td>
+
+                    <td>
+                        <div class="d-flex flex-wrap gap-2">
+                            <a href="{% url 'instructor_course_edit' course.slug %}"
+                                class="btn btn-sm btn-outline-primary">
+                                Edit Course
+                            </a>
+
+                            {% if course.is_published %}
+                            <a href="{% url 'course_detail' course.slug %}" class="btn btn-sm btn-outline-secondary">
+                                View
+                            </a>
+                            {% endif %}
+
+                            <form method="post" action="{% url 'instructor_course_delete' course.slug %}"
+                                onsubmit="return confirm('Delete this course? This action cannot be undone.');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                    Delete Course
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+
+        </table>
+    </div>
+
+    {% else %}
+    <div class="alert alert-info">
+        <h5>No courses yet</h5>
+        <p>You haven't created any courses. Create your first course to get started.</p>
+
+        <a href="{% url 'instructor_course_create' %}" class="btn btn-primary">
+            Create Your First Course
+        </a>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

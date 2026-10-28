@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+
+    <h1>My Learning</h1>
+    <p>Track your courses and continue learning.</p>
+
+    {% if enrollments %}
+
+    <div class="course-list">
+
+        {% for enrollment in enrollments %}
+
+        <div class="course-card">
+
+            <h2>{{ enrollment.course.title }}</h2>
+
+            <p>
+                {{ enrollment.course.description|truncatewords:25 }}
+            </p>
+
+            <p>
+                <strong>Instructor:</strong>
+                {{ enrollment.course.instructor.username }}
+            </p>
+
+            <p>
+                <strong>Enrolled:</strong>
+                {{ enrollment.enrolled_at|date:"M d, Y" }}
+            </p>
+
+            <hr>
+
+            <h3>Learning Progress</h3>
+
+            <p>
+                <strong>
+                    {{ enrollment.completed_lessons }}
+                </strong>
+                of
+                <strong>
+                    {{ enrollment.total_lessons }}
+                </strong>
+                lessons completed
+            </p>
+
+            <p>
+                <strong>
+                    {{ enrollment.progress_percentage }}%
+                </strong>
+                complete
+            </p>
+
+            <div role="progressbar" aria-label="Course completion progress"
+                aria-valuenow="{{ enrollment.progress_percentage }}" aria-valuemin="0" aria-valuemax="100" style="
+                            width: 100%;
+                            height: 14px;
+                            background-color: #e5e7eb;
+                            border-radius: 8px;
+                            overflow: hidden;
+                        ">
+                <div style="
+                                width: {{ enrollment.progress_percentage }}%;
+                                height: 100%;
+                                background-color: #7c3aed;
+                                border-radius: 8px;
+                            "></div>
+            </div>
+
+            <br>
+
+            {% if enrollment.course.is_free or enrollment.has_paid %}
+
+            <a href="{% url 'course_detail' enrollment.course.slug %}">
+                Continue Learning
+            </a>
+
+            {% else %}
+
+            <p>
+                Payment is required to access this course.
+            </p>
+
+            {% endif %}
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+    {% else %}
+
+    <p>You haven't enrolled in any courses yet.</p>
+
+    <a href="{% url 'course_list' %}">
+        Browse Courses
+    </a>
+
+    {% endif %}
+
+</div>
+{% endblock %}

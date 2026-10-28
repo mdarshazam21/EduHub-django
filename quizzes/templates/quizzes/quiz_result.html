@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Quiz Result | EduHub
+{% endblock %}
+
+{% block content %}
+
+<div class="card">
+    <h2>{{ attempt.quiz.title }} — Result</h2>
+
+    <div class="quiz-score-summary {% if attempt.passed %}passed{% else %}failed{% endif %}">
+
+        <p class="quiz-score">
+            {{ attempt.score }}%
+        </p>
+
+        <p>
+            {% if attempt.passed %}
+            Congratulations! You passed the quiz.
+            {% else %}
+            You did not pass.
+            Required score: {{ attempt.quiz.passing_score }}%.
+            {% endif %}
+        </p>
+
+    </div>
+
+    <hr>
+
+    <h3>Answer Review</h3>
+
+    {% for answer in answers %}
+
+    <div class="quiz-answer-review {% if answer.selected_choice.is_correct %}correct{% else %}incorrect{% endif %}">
+
+        <p>
+            <strong>{{ answer.question.text }}</strong>
+        </p>
+
+        <p>
+            Your answer:
+            {{ answer.selected_choice.text }}
+
+            {% if answer.selected_choice.is_correct %}
+            ✓ Correct
+            {% else %}
+            ✗ Incorrect
+            {% endif %}
+        </p>
+
+    </div>
+
+    {% empty %}
+
+    <p>No answers were recorded for this attempt.</p>
+
+    {% endfor %}
+
+    <a href="{% url 'course_detail' attempt.quiz.lesson.section.course.slug %}" class="btn btn-primary">
+        Back to Course
+    </a>
+
+</div>
+
+{% endblock %}

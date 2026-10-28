@@ -1,50 +1,57 @@
 # EduHub — E-Learning Platform
 
-A Django-based e-learning platform designed to help students discover courses, enroll in learning programs, track their progress, and complete quizzes. The platform also provides tools for instructors to manage educational content.
+EduHub is a Django-based e-learning platform designed to organize online courses and support students throughout their learning journey. The project includes separate Django applications for accounts, courses, quizzes, student progress, and certificates.
 
 ## Features
 
-* **User Management:** Separate areas and access permissions for students, instructors, and administrators.
-* **Course Management:** Organize courses and their learning content.
-* **Course Enrollment:** Allow students to enroll in available courses.
-* **Quizzes:** Support assessments and knowledge checks.
+* **User Management:** Account management and role-based access for students, instructors, and administrators.
+* **Course Management:** Organize and manage online courses.
+* **Course Enrollment:** Support student enrollment in courses.
+* **Quizzes:** Provide assessments to evaluate student understanding.
 * **Progress Tracking:** Track student learning progress.
-* **Certificates:** Organize course completion certificates.
-* **Search and Filtering:** Help users find relevant courses.
-* **Django Admin:** Manage application data through Django's administration interface.
+* **Certificates:** Support course completion certificates.
+* **Course Discovery:** Search and filter available courses.
+* **Admin Interface:** Manage application data using Django Admin.
 
-## Tech Stack
+> Note: Features listed above should match the functionality currently implemented in the project.
 
-* **Language:** Python
-* **Backend Framework:** Django
-* **Database:** SQLite for local development
-* **Frontend:** HTML, CSS, Django Templates
-* **Version Control:** Git and GitHub
+## Technology Stack
+
+| Technology            | Purpose                                 |
+| --------------------- | --------------------------------------- |
+| Python                | Programming language                    |
+| Django                | Backend web framework                   |
+| Django REST Framework | REST API development                    |
+| SQLite                | Local development database              |
+| PostgreSQL            | Supported database connectivity         |
+| HTML and CSS          | Frontend templates and styling          |
+| Git and GitHub        | Version control and source code hosting |
 
 ## Project Structure
 
 ```text
 elearning_platform/
-├── accounts/             # User accounts and roles
-├── certificates/         # Certificate functionality
-├── courses/              # Course management and enrollment
-├── elearning_project/    # Django project configuration
-├── progress/             # Student progress tracking
-├── quizzes/              # Quiz functionality
-├── static/               # Static assets
-├── templates/            # HTML templates
-├── .gitignore            # Files excluded from Git
-├── manage.py             # Django management utility
-└── README.md             # Project documentation
+├── accounts/
+├── certificates/
+├── courses/
+├── elearning_project/
+├── progress/
+├── quizzes/
+├── static/
+├── templates/
+├── .gitignore
+├── manage.py
+├── requirements.txt
+└── README.md
 ```
 
-## Getting Started
+## Installation and Setup
 
 ### Prerequisites
 
-* Python 3.10 or a compatible version supported by your dependencies
-* pip
+* Python compatible with the versions of Django and other dependencies in `requirements.txt`
 * Git
+* pip
 
 ### 1. Clone the repository
 
@@ -53,7 +60,7 @@ git clone https://github.com/mdarshazam21/EduHub-django.git
 cd EduHub-django
 ```
 
-### 2. Create a virtual environment
+### 2. Create and activate a virtual environment
 
 **Windows PowerShell:**
 
@@ -64,27 +71,22 @@ python -m venv .venv
 
 ### 3. Install dependencies
 
-Install the packages required by your project:
-
 ```powershell
-pip install django python-dotenv
-```
-
-If you maintain a `requirements.txt` file, use that instead:
-
-```powershell
+python -m pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
 ### 4. Configure environment variables
 
-Create a `.env` file in the project root and set your Django secret key:
+Create a `.env` file in the project root, alongside `manage.py`.
+
+Add the following configuration:
 
 ```env
 DJANGO_SECRET_KEY=replace_with_your_own_secret_key
 ```
 
-Use your own secret key. Never publish the `.env` file or commit production secrets to GitHub.
+Replace the placeholder with a securely generated Django secret key. Never commit your `.env` file or expose secret keys publicly.
 
 ### 5. Apply database migrations
 
@@ -92,13 +94,13 @@ Use your own secret key. Never publish the `.env` file or commit production secr
 python manage.py migrate
 ```
 
-### 6. Create an administrator account
+### 6. Create a superuser
 
 ```powershell
 python manage.py createsuperuser
 ```
 
-Follow the prompts to create your account.
+Follow the prompts to create an administrator account.
 
 ### 7. Start the development server
 
@@ -106,21 +108,25 @@ Follow the prompts to create your account.
 python manage.py runserver
 ```
 
-Open the local development address shown in your terminal to access the application.
+Open the local address displayed in your terminal to access the application.
 
-## Environment and Security
+## Security Notes
 
-* Keep `.env` and its secrets out of version control.
-* Do not commit your local database or virtual environment.
-* Configure production settings and environment variables before deployment.
-* Use a production-ready database and web server when deploying the application.
+* Keep secret keys and credentials in environment variables.
+* Do not commit `.env`, `.venv`, or local database files.
+* Use appropriate production settings before deployment.
+* Configure a production-ready database and web server when deploying.
 
 ## Future Improvements
 
-Potential improvements include payment gateway integration, automated tests, deployment automation, and enhanced instructor analytics.
+Potential improvements include expanded automated testing, payment integration, instructor analytics, and deployment automation.
 
 ## Author
 
 **MD Arsh Azam**
 
 GitHub: [mdarshazam21](https://github.com/mdarshazam21)
+
+## License
+
+No license has been specified yet.

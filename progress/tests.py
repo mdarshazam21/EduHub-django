@@ -1,11 +1,13 @@
 from django.urls import reverse
 from django.test import TestCase
-from django.urls import reverse
 from django.contrib.auth import get_user_model
+
 from courses.models import Course, Section, Lesson, Enrollment
 from progress.models import LessonProgress
+
 from rest_framework.test import APITestCase
 from rest_framework import status
+
 
 User = get_user_model()
 
@@ -20,12 +22,11 @@ class StudentDashboardAccessTest(TestCase):
             role=User.Role.STUDENT,
         )
 
-    def test_logged_out_user_cannot_access_dashboard(self):
-        # Request the dashboard without logging in.
+    def test_logged_out_user_is_redirected_to_login(self):
         response = self.client.get(reverse("student_dashboard"))
 
-        # Unauthenticated users should receive HTTP 403 Forbidden.
-        self.assertEqual(response.status_code, 403)
+        # login_required redirects unauthenticated users.
+        self.assertEqual(response.status_code, 302)
 
     def test_logged_in_student_can_access_dashboard(self):
         # Log in as a student.
@@ -34,10 +35,8 @@ class StudentDashboardAccessTest(TestCase):
             password="TestPassword123!",
         )
 
-        # Request the student dashboard.
         response = self.client.get(reverse("student_dashboard"))
 
-        # The student should access the dashboard successfully.
         self.assertEqual(response.status_code, 200)
 
     def test_instructor_cannot_access_student_dashboard(self):
@@ -51,7 +50,6 @@ class StudentDashboardAccessTest(TestCase):
         # Log in as the instructor.
         self.client.force_login(instructor)
 
-        # Attempt to access the student dashboard.
         response = self.client.get(reverse("student_dashboard"))
 
         # The instructor should be denied access.
@@ -126,7 +124,8 @@ class StudentDashboardAPITests(APITestCase):
             has_paid=True,
         )
 
-        self.dashboard_url = reverse("student_dashboard")
+        # API dashboard URL.
+        self.dashboard_url = reverse("student_dashboard_api")
 
     def test_dashboard_returns_correct_course_progress(self):
         # Complete one of the three lessons.
@@ -186,7 +185,9 @@ class StudentDashboardAPITests(APITestCase):
         response = self.client.get(self.dashboard_url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data["summary"]["total_enrolled_courses"], 0)
+        self.assertEqual(
+            response.data["summary"]["total_enrolled_courses"], 0
+        )
         self.assertEqual(response.data["enrolled_courses"], [])
 
     def test_dashboard_handles_course_without_lessons(self):
@@ -232,7 +233,7 @@ class StudentDashboardAPITests(APITestCase):
             title="Empty Course",
             slug="empty-course",
             description="A course with no lessons.",
-            level="BEGINNER",
+            level=Course.Level.BEGINNER,
             is_free=True,
             price=0,
             is_published=True,
@@ -248,8 +249,8 @@ class StudentDashboardAPITests(APITestCase):
         # Authenticate as the student.
         self.client.force_authenticate(user=self.student)
 
-        # Request the student dashboard.
-        response = self.client.get(reverse("student_dashboard"))
+        # Request the API dashboard, not the HTML dashboard.
+        response = self.client.get(self.dashboard_url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -268,6 +269,7 @@ class StudentDashboardAPITests(APITestCase):
 
 
 class MarkLessonCompleteAPITests(APITestCase):
+
     def setUp(self):
         self.instructor = User.objects.create_user(
             username="lesson_api_instructor",
@@ -401,6 +403,7 @@ class MarkLessonCompleteAPITests(APITestCase):
 
 
 class StudentCourseLessonProgressAPITests(APITestCase):
+
     def setUp(self):
         # Create users with different roles.
         self.student = User.objects.create_user(
@@ -458,7 +461,7 @@ class StudentCourseLessonProgressAPITests(APITestCase):
             is_preview=False,
         )
 
-        # Enroll the student using the project's enrollment rules.
+        # Enroll the student.
         Enrollment.objects.create(
             student=self.student,
             course=self.course,
@@ -493,7 +496,10 @@ class StudentCourseLessonProgressAPITests(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-        lessons = {lesson["id"]: lesson for lesson in response.data["lessons"]}
+        lessons = {
+            lesson["id"]: lesson
+            for lesson in response.data["lessons"]
+        }
 
         completed = lessons[self.completed_lesson.id]
         incomplete = lessons[self.incomplete_lesson.id]
@@ -511,14 +517,20 @@ class StudentCourseLessonProgressAPITests(APITestCase):
 
         response = self.client.get(self.url)
 
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_403_FORBIDDEN,
+        )
 
     def test_unenrolled_student_cannot_view_lesson_progress(self):
         self.client.force_authenticate(user=self.other_student)
 
         response = self.client.get(self.url)
 
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_403_FORBIDDEN,
+        )
 
     def test_nonexistent_course_returns_404(self):
         self.client.force_authenticate(user=self.student)
@@ -530,12 +542,18 @@ class StudentCourseLessonProgressAPITests(APITestCase):
 
         response = self.client.get(url)
 
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_404_NOT_FOUND,
+        )
 
     def test_unauthenticated_user_cannot_view_lesson_progress(self):
         response = self.client.get(self.url)
 
         self.assertIn(
             response.status_code,
-            [status.HTTP_401_UNAUTHORIZED, status.HTTP_403_FORBIDDEN],
+            [
+                status.HTTP_401_UNAUTHORIZED,
+                status.HTTP_403_FORBIDDEN,
+            ],
         )

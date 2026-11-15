@@ -18,6 +18,12 @@ db.sqlite3
 db.sqlite3-journal
 staticfiles/
 
+# Django databases and exported data
+*.sqlite3
+*.sqlite3-journal
+sqlite_data.json
+staticfiles/
+
 # Testing
 .coverage
 htmlcov/
